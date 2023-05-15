@@ -1,0 +1,124 @@
+Third Party POST API Consumption:
+
+########POJO####
+package com.schneider.api.dto.ap;
+
+import javax.persistence.Transient;
+import java.util.Date;
+
+public class PoDTO {
+
+    private String poNo;
+
+    private String name;
+
+    private String address;
+
+    private int Quantity;
+
+    private double price;
+
+    private Date deliveryDate;
+
+    private String lineItemNo;
+    private String materialNo;
+    private String companyCode;
+
+    @Transient
+    private String dDate;
+
+    public String getPoNo() {
+        return poNo;
+    }
+
+    public void setPoNo(String poNo) {
+        this.poNo = poNo;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public int getQuantity() {
+        return Quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        Quantity = quantity;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public Date getDeliveryDate() {
+        return deliveryDate;
+    }
+
+    public void setDeliveryDate(Date deliveryDate) {
+        this.deliveryDate = deliveryDate;
+    }
+
+    public String getdDate() {
+        return dDate;
+    }
+
+    public void setdDate(String dDate) {
+        this.dDate = dDate;
+    }
+
+    public String getLineItemNo() {
+        return lineItemNo;
+    }
+
+    public void setLineItemNo(String lineItemNo) {
+        this.lineItemNo = lineItemNo;
+    }
+
+    public String getMaterialNo() {
+        return materialNo;
+    }
+
+    public void setMaterialNo(String materialNo) {
+        this.materialNo = materialNo;
+    }
+
+    public String getCompanyCode() {
+        return companyCode;
+    }
+
+    public void setCompanyCode(String companyCode) {
+        this.companyCode = companyCode;
+    }
+}
+
+#########Controller########
+
+    @PostMapping("/consume-submit-po")
+    @PreAuthorize("hasAuthority('AP ANALYST')")
+    public ResponseEntity<?> consumeSubmitPO(@RequestBody PoDTO poDTO) {
+       try {
+           String response = new RestTemplate().postForObject("http://localhost:8081/dummy/submitPO", poDTO, String.class);
+           return ResponseEntity.ok("Purchase Order submitted successfully..!!");
+       } catch (Exception e) {
+           e.printStackTrace();
+       }
+       return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Response object is null");
+        
+		}

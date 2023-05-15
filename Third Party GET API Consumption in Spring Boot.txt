@@ -1,0 +1,311 @@
+###Third party GET API Consumption :
+
+#########POJO#########
+
+package com.schneider.api.dto.ap;
+
+import java.util.Date;
+
+public class PurchaseOrderDTO {
+
+    private String poNo;
+
+    private String name;
+
+    private String address;
+
+    private String Quantity;
+
+    private double price;
+
+    private Date deliveryDate;
+
+    private String status;
+
+    private Date submissionDate;
+
+    private String lineItemNo;
+    private String materialNo;
+    private String companyCode;
+
+    public String getPoNo() {
+        return poNo;
+    }
+
+    public void setPoNo(String poNo) {
+        this.poNo = poNo;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getQuantity() {
+        return Quantity;
+    }
+
+    public void setQuantity(String quantity) {
+        Quantity = quantity;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public Date getDeliveryDate() {
+        return deliveryDate;
+    }
+
+    public void setDeliveryDate(Date deliveryDate) {
+        this.deliveryDate = deliveryDate;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Date getSubmissionDate() {
+        return submissionDate;
+    }
+
+    public void setSubmissionDate(Date submissionDate) {
+        this.submissionDate = submissionDate;
+    }
+
+    public String getLineItemNo() {
+        return lineItemNo;
+    }
+
+    public void setLineItemNo(String lineItemNo) {
+        this.lineItemNo = lineItemNo;
+    }
+
+    public String getMaterialNo() {
+        return materialNo;
+    }
+
+    public void setMaterialNo(String materialNo) {
+        this.materialNo = materialNo;
+    }
+
+    public String getCompanyCode() {
+        return companyCode;
+    }
+
+    public void setCompanyCode(String companyCode) {
+        this.companyCode = companyCode;
+    }
+}
+
+###################ServiceImpl###############################
+
+package com.schneider.api.service.impl;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.schneider.api.controller.APAnalystController;
+import com.schneider.api.dto.ap.LogisticDataDTO;
+import com.schneider.api.dto.ap.PurchaseOrderDTO;
+import com.schneider.api.exception.BlockchainException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.*;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+public class APPurchaseOrderServiceImpl {
+
+    private static final Logger LOG = LoggerFactory.getLogger(APPurchaseOrderServiceImpl.class);
+
+    // AP Dashboard - Search PO Details on the basis of fromDate and toDate
+    // Auther - Sagar
+
+//    public List<PurchaseOrderDTO> getPurchaseOrderList(String fromDate, String toDate) throws JsonProcessingException {
+//        List<PurchaseOrderDTO> purchaseOrderDTOList = new ArrayList<>();
+//        final HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.APPLICATION_JSON);
+//        final HttpEntity entity = new HttpEntity(headers);
+//        //To call third party API Using RestTemplate
+//        RestTemplate restTemplate = new RestTemplate();
+//        final String GET_PURCHASE_ORDER_ENDPOINT_URL = "http://localhost:8081/dummy/getPO" + "?fromDate=" + fromDate + "&toDate=" + toDate;
+//        ResponseEntity<String> responseEntity = restTemplate.exchange(GET_PURCHASE_ORDER_ENDPOINT_URL, HttpMethod.GET, entity, String.class);
+//        if (responseEntity != null && responseEntity.getStatusCode().equals(HttpStatus.OK)) {
+//            responseEntity.getBody();
+//            LOG.info("Checking responseEntity Data : " + responseEntity.getBody());
+//            // Parsing JSON to Object
+//            ObjectMapper objectMapper = new ObjectMapper();
+//            List<PurchaseOrderDTO> purchaseOrderDTO = objectMapper.readValue(responseEntity.getBody(), List.class);
+//            LOG.info("Checking Data Inside purchaseOrderDTO : " + purchaseOrderDTO);
+//            purchaseOrderDTOList.addAll(purchaseOrderDTO);
+//        }
+//        return purchaseOrderDTOList;
+//    }
+
+    // AP Dashboard - Search PO Details on the basis of fromDate and toDate
+    // Auther - Sagar
+    public List<PurchaseOrderDTO> getPurchaseOrderList(String fromDate, String toDate) throws JsonProcessingException {
+        var headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        var entity = new HttpEntity<>(headers);
+        var restTemplate = new RestTemplate();
+        var url = "http://localhost:8081/dummy/getPO?fromDate=" + fromDate + "&toDate=" + toDate;
+        try {
+            var response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+            if (response != null && response.getStatusCode().is2xxSuccessful()) {
+                var responseBody = response.getBody();
+                var purchaseOrderDTOList = new ObjectMapper().readValue(responseBody, new TypeReference<>() {
+                });
+                return (List<PurchaseOrderDTO>) purchaseOrderDTOList;
+            }
+        } catch (HttpServerErrorException e) {
+            throw new BlockchainException("Blockchain server down!!");
+        } catch (RestClientException e) {
+            // handle other REST API related exceptions
+        }
+        return List.of();
+    }
+
+
+    // AP Dashboard - Search Logistic Data on the basis of fromDate and toDate
+//    public List<LogisticDataDTO> getLogisticData(String fromDate, String toDate) throws JsonProcessingException {
+//        List<LogisticDataDTO> LogisticDataDTOList = new ArrayList<>();
+//        final HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.APPLICATION_JSON);
+//        final HttpEntity entity = new HttpEntity(headers);
+//        //To call third party API Using RestTemplate
+//        RestTemplate restTemplate = new RestTemplate();
+//        final String GET_LOGISTIC_DATA_ENDPOINT_URL = "http://localhost:8081/dummy/get-logistic-data" + "?fromDate=" + fromDate + "&toDate=" + toDate;
+//        ResponseEntity<String> responseEntity = restTemplate.exchange(GET_LOGISTIC_DATA_ENDPOINT_URL, HttpMethod.GET, entity, String.class);
+//        if (responseEntity != null && responseEntity.getStatusCode().equals(HttpStatus.OK)) {
+//            responseEntity.getBody();
+//            // Parsing JSON to Object
+//            ObjectMapper objectMapper = new ObjectMapper();
+//            List<LogisticDataDTO> logisticDataDTO = objectMapper.readValue(responseEntity.getBody(), List.class);
+//            LogisticDataDTOList.addAll(logisticDataDTO);
+//        }
+//        return LogisticDataDTOList;
+//    }
+
+
+    // AP Dashboard - Search Logistic Data on the basis of fromDate and toDate
+    public List<LogisticDataDTO> getLogisticData(String fromDate, String toDate) {
+        try {
+            var headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            var entity = new HttpEntity<>(headers);
+            var restTemplate = new RestTemplate();
+            var url = "http://localhost:8081/dummy/get-logistic-data?fromDate=" + fromDate + "&toDate=" + toDate;
+            var response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+            if (response != null && response.getStatusCode().equals(HttpStatus.OK)) {
+                var responseBody = response.getBody();
+                var logisticDataDTO = new ObjectMapper().readValue(responseBody, new TypeReference<>() {
+                });
+                return (List<LogisticDataDTO>) logisticDataDTO;
+            }
+        } catch (RestClientException | JsonProcessingException e) {
+            throw new BlockchainException("Blockchain server not connected please check!!");
+        }
+        return List.of();
+    }
+
+
+}
+
+###################Controller##########################################
+
+package com.schneider.api.controller;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.schneider.api.dto.ap.LogisticDataDTO;
+import com.schneider.api.dto.ap.PoDTO;
+import com.schneider.api.dto.ap.PurchaseOrderDTO;
+import com.schneider.api.service.impl.APPurchaseOrderServiceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/ap")
+public class APAnalystController {
+
+    private static final Logger LOG = LoggerFactory.getLogger(APAnalystController.class);
+
+    @Autowired
+    APPurchaseOrderServiceImpl apPurchaseOrderServiceImpl;
+
+    /**
+     * AP Dashboard - search PO API
+     * Author - Sagar
+     */
+    @GetMapping("/consume-purchaseOrder")
+    public ResponseEntity<List<PurchaseOrderDTO>> consumePurchaseOrderGetApi(@RequestParam("fromDate") String fromDate, @RequestParam("toDate") String toDate) throws JsonProcessingException {
+
+        return new ResponseEntity<>(apPurchaseOrderServiceImpl.getPurchaseOrderList(fromDate, toDate), HttpStatus.OK);
+
+    }
+
+    /**
+     * AP Dashboard - Submit PO API
+     * Author - Sagar
+     */
+    @PostMapping("/consume-submit-po")
+    public ResponseEntity<?> consumeSubmitPO(@RequestBody PoDTO PoDTO) {
+        final String POST_SUBMIT_PO_ENDPOINT_URL = "http://localhost:8081/dummy/submitPO";
+        RestTemplate restTemplate = new RestTemplate();
+        String response = null;
+        try {
+            response = restTemplate.postForObject(POST_SUBMIT_PO_ENDPOINT_URL, PoDTO, String.class);
+            LOG.info("Checking Response for Consume Submit PO :" + response);
+            return new ResponseEntity<String>("purchaseOrderDTO submitted successfully..!!", HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new ResponseEntity<String>("Response object is null", HttpStatus.NO_CONTENT);
+
+    }
+
+
+    /**
+     * AP Dashboard - search Logistic Data API
+     * Author - Sagar
+     */
+    @GetMapping("/consume-logistic-data")
+    public ResponseEntity<List<LogisticDataDTO>> consumeLogisticDataGetApi(@RequestParam("fromDate") String fromDate, @RequestParam("toDate") String toDate)
+            throws JsonProcessingException {
+        return new ResponseEntity<>(apPurchaseOrderServiceImpl.getLogisticData(fromDate, toDate), HttpStatus.OK);
+    }
+
+
+}
